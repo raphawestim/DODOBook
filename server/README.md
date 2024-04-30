@@ -29,3 +29,55 @@ Clone o repositório em sua máquina local:
 ```bash
 git clone https://github.com/seuusuario/dodobook-backend.git
 cd dodobook-backend
+```
+### Instale as dependências do projeto:
+```bash
+npm install
+```
+### Configuração do Ambiente
+Crie um arquivo .env na raiz do projeto e adicione as seguintes variáveis de ambiente:
+```bash
+DATABASE_URL="file:./dev.db"
+```
+Este é o caminho para o seu arquivo de banco de dados SQLite.
+
+### Executando o Projeto
+Para iniciar o servidor, execute:
+```bash
+npm run dev
+```
+O servidor estará acessível em http://localhost:3000.
+
+### Estrutura do Projeto
+```bash
+/
+|-- src/
+|   |-- routes/
+|   |   |-- users.js
+|   |   |-- books.js
+|   |   |-- groups.js
+|   |-- models/
+|   |-- utils/
+|   |-- server.ts
+|-- prisma/
+|   |-- schema.prisma
+|-- .env
+|-- .gitignore
+|-- package.json
+|-- README.md
+```
+src/: Contém todos os arquivos de código fonte.
+src/routes/: Definições de rotas para a API.
+src/models/: Modelos utilizados pelo Prisma.
+src/utils/: Funções utilitárias, como web scraping.
+prisma/schema.prisma: Definição dos modelos de dados.
+.env: Arquivo para as variáveis de ambiente.
+README.md: Este arquivo.
+
+## Contribuindo
+Para contribuir com o projeto, considere as seguintes etapas:
+
+1. Faça um fork do projeto.
+2. Crie uma nova branch para suas alterações.
+3. Faça suas alterações.
+4. Envie um pull request.
