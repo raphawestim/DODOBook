@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  theme    = "neutral"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String
+  name     String
+  groups   Group[]
+}
+
+model Book {
+  id        String  @id @default(cuid())
+  title     String
+  bannerUrl String
+  author    String
+  isbn      String  @unique
+  price     Float
+  synopsis  String?
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String
+  discord   String
+  weekDays  String
+  hourStart Int
+  hourEnd   Int
+  members   User[]
+  createdAt DateTime @default(now())
+  isPrivate Boolean  @default(true)
+}
