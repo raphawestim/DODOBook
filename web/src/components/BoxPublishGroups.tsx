@@ -21,8 +21,7 @@ function BoxPublishGroups(){
 
       </div>
     </div>
-    </main>
-    
+    </main> 
   );
 }
 
