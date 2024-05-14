@@ -1,89 +1,47 @@
 import Fastify from 'fastify';
+import dotenv from 'dotenv';
 import cors from '@fastify/cors';
-import { PrismaClient } from '@prisma/client';
+import fastifySecureSession from 'fastify-secure-session';
+import fastifyPassport from 'fastify-passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
-// Instância do Prisma Client
-const prisma = new PrismaClient({
-  log: ['query'],
-});
+import setupBookRoutes from './routes/bookRoutes';
+import { setupAuthRoutes } from './routes/authRotes'; // Assumindo que isso esteja definido
+import { setupGoogleStrategy } from './auth/googleStrategy'; // Assumindo que isso esteja definido
 
-// Função principal
-async function bootscrap() {
-const fastify = Fastify({
-  logger: true
-});
+async function bootstrap() {
+  dotenv.config();
+  const fastify = Fastify({ logger: true });
 
-// Registrando o plugin de CORS
-await fastify.register(cors, {
-  origin: true,
-});
+  // Configurações de CORS
+  fastify.register(cors, { origin: true });
 
-// Rota de boas-vindas
-fastify.get('/', async (request, reply) => {
-  reply.send({ message: 'Bem-vindo ao DODOBook!' });
-});
-
-// Rota para criar um novo usuário
-fastify.post('/users/register', async (request, reply) => {
-  const { email, password, name } = request.body as any;
-  const user = await prisma.user.create({
-    data: { email, password, name }
+  // Configurações de sessão segura
+  fastify.register(fastifySecureSession, {
+    secret: process.env.SESSION_SECRET || 'a_very_secret_secret',
+    cookie: {
+      secure: false,
+    },
   });
-  reply.code(201).send(user);
-});
 
-// Rota para listar todos os usuários
-fastify.get('/users', async (request, reply) => {
-  const users = await prisma.user.findMany();
-  reply.send(users);
-});
+  // Inicializa fastify-passport e sessão segura
+  fastify.register(fastifyPassport.initialize());
+  fastify.register(fastifyPassport.secureSession());
 
-//Rota para login
-fastify.post('/users/login', async (request, reply) => {
-  const { email, password } = request.body as any;
-  const user = await prisma.user.findFirst({
-    where: { email, password}
-  });
-  if (user) {
-    reply.send(user);
-  } else {
-    reply.code(401).send({ message: 'Credenciais inválidas' });
+  // Configuração da estratégia do Google
+  setupGoogleStrategy();
+
+  // Registro de rotas
+  setupBookRoutes(fastify);
+  setupAuthRoutes(fastify); // Registro das rotas de autenticação
+
+  try {
+    await fastify.listen({ port: 3000, host: '0.0.0.0' });
+    console.log('Servidor rodando na porta 3000 PARABÉNS!');
+  } catch (error) {
+    console.error('Falha ao iniciar o servidor:', error);
+    process.exit(1);
   }
-});
-
-// Rotas de livro
-fastify.post('/books', async (request, reply) => {
-  const { title, bannerUrl, author, isbn, price, synopsis } = request.body as any;
-  const book = await prisma.book.create({
-    data: { title, bannerUrl, author, isbn, price, synopsis }
-  });
-  reply.code(201).send(book);
-});
-
-fastify.get('/books', async (request, reply) => {
-  const books = await prisma.book.findMany();
-  reply.send(books);
-});
-
-// Rotas de grupo
-fastify.post('/groups', async (request, reply) => {
-  const { name, discord, weekDays, hourStart, hourEnd, private: isPrivate } = request.body as any;
-  const group = await prisma.group.create({
-    data: { name, discord, weekDays, hourStart, hourEnd, isPrivate }
-  });
-  reply.code(201).send(group);
-});
-
-fastify.get('/groups', async (request, reply) => {
-  const groups = await prisma.group.findMany();
-  reply.send(groups);
-});
-
-
-
-await fastify.listen({port: 3000, host: '0.0.0.0'});
-console.log('Servidor rodando na porta 3000 PARABENS!');
-
 }
 
-bootscrap();
+bootstrap();
