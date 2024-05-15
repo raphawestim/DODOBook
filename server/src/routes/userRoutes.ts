@@ -1,36 +1,51 @@
-import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@prisma/client";
-import { fastifyPassport } from "fastify-passport";
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import passport from 'passport';
+import { setupGoogleStrategy } from '../auth/googleStrategy';
 
-const prisma = new PrismaClient(); 
+const router = express.Router();
+const prisma = new PrismaClient();
 
-export const setupUserRoutes = (fastify: FastifyInstance) => {
-  //Registro de Usuário
-  fastify.post('/register', async (request, reply) => {
-    const { email, password, name} = request.body as any;
+// Inicializa a estratégia do Google
+setupGoogleStrategy();
 
-    try{
-      const user = await prisma.user.create({
-        data:{email, password, name}
-      });
-      reply.code(201).send(user);
-    }catch(error){
-      console.error('Failed to register user:', error);
-      reply.status(500).send({message: 'Failed to register user'});
-    }
-  });
-
-  //Login de Usuário
-  fastify.post('/login', async (request, reply) => {
-    const { email, password } = request.body as any;
-    const user = await prisma.user.findUnique({
-      where: { email}
+// Registro de Usuário
+router.post('/register', async (req, res) => {
+  const { email, password, name } = req.body;
+  try {
+    const user = await prisma.user.create({
+      data: { email, password, name }
     });
-    if(user && user.password === password){
-      reply.send(user);
-    }else{
-      reply.status(401).send({ message: 'Invalid credentials' });
-    }
+    res.status(201).json(user);
+  } catch (error) {
+    console.error('Failed to register user:', error);
+    res.status(500).json({ message: 'Failed to register user' });
+  }
+});
+
+// Login de Usuário
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await prisma.user.findUnique({
+    where: { email }
+  });
+  if (user && user.password === password) {
+    res.json(user);
+  } else {
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
+});
+
+// Rota para iniciar a autenticação do Google
+router.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// Rota de callback após a autenticação do Google
+router.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    // Sucesso na autenticação, redirecionar para home ou outra rota
+    res.redirect('/profile');
   });
 
-}
+export default router;
