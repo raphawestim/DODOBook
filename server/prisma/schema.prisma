@@ -15,14 +15,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Membership {
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  @@id([groupId, userId])
+}
+
 model User {
-  id         String  @id @default(cuid())
-  email      String  @unique
-  password   String? // Tornar opcional para suportar logins via Google
-  name       String
-  googleId   String? // Campo para ID do Google
-  profileUrl String? // Campo para URL da imagem de perfil
-  groups     Group[]
+  id          String       @id @default(cuid())
+  email       String       @unique
+  password    String? // Opcional para suportar logins via Google
+  name        String
+  googleId    String? // ID do Google
+  profileUrl  String? // URL da imagem de perfil
+  memberships Membership[] // Adiciona a relação muitos-para-muitos através de Membership
+}
+
+model Group {
+  id          String       @id @default(cuid())
+  name        String
+  discord     String
+  weekDays    String
+  hourStart   Int
+  hourEnd     Int
+  createdAt   DateTime     @default(now())
+  isPrivate   Boolean      @default(true)
+  isAvailable Boolean      @default(true) // Para disponibilidade do grupo
+  memberships Membership[] // Adiciona a relação muitos-para-muitos através de Membership
 }
 
 model Book {
@@ -33,17 +55,4 @@ model Book {
   isbn      String  @unique
   price     Float
   synopsis  String?
-}
-
-model Group {
-  id        String   @id @default(cuid())
-  name      String
-  discord   String
-  weekDays  String
-  hourStart Int
-  hourEnd   Int
-  createdAt DateTime @default(now())
-  isPrivate Boolean  @default(true)
-  members   User     @relation(fields: [userId], references: [id])
-  userId    String
 }

@@ -7,6 +7,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 import bookRoutes from './routes/bookRoutes';
 import userRoutes from './routes/userRoutes';
+import groupRoutes from './routes/groupRoutes';
 
 dotenv.config();
 const app = express();
@@ -31,6 +32,9 @@ app.use('/books', bookRoutes);
 
 // Use o módulo de rotas de usuários no caminho '/users'
 app.use('/users', userRoutes);
+
+// depois de configurar o app e middlewares
+app.use('/api', groupRoutes);
 
 // Iniciar o servidor
 try {
