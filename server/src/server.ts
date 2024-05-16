@@ -33,16 +33,16 @@ app.use('/books', bookRoutes);
 // Use o módulo de rotas de usuários no caminho '/users'
 app.use('/users', userRoutes);
 
-// depois de configurar o app e middlewares
+// Use o módulo de rotas de livros no caminho '/groups'
 app.use('/api', groupRoutes);
 
 // Iniciar o servidor
 try {
   // Tente iniciar o servidor
   app.listen(3000, () => {
-      console.log('Server running on port 3000');
+      console.log('Servidor iniciado! Para encerrar pressione Ctrl + C.');
   });
 } catch (error) {
   // Caso ocorra algum erro ao iniciar o servidor, ele será capturado aqui
-  console.error('Failed to start server:', error);
+  console.error('Falha ao iniciar o servidor!', error);
 }

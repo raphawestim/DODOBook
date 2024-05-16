@@ -13,7 +13,11 @@ const config: Config = {
         alt: 'var(--font-poppins)',
       },
       colors: {
+        black:{
+          10: '#1A2126',
+        },
         gray: {
+          10: '#D9D9D9',
           50: '#e8e9e9',
           100: '#dddede',
           200: '#b8babc',
