@@ -23,23 +23,23 @@ app.use(session({
     cookie: { secure: false } // Configure como true se estiver em produção com HTTPS
 }));
 
+
+// Importante: Middleware para analisar JSON deve vir antes das rotas
+app.use(express.json());
+
 // Inicializa passport e sessão para autenticação
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Use o módulo de rotas de livros no caminho '/books'
+// módulo de rotas
 app.use('/books', bookRoutes);
-
-// Use o módulo de rotas de usuários no caminho '/users'
 app.use('/users', userRoutes);
-
-// Use o módulo de rotas de livros no caminho '/groups'
 app.use('/api', groupRoutes);
 
 // Iniciar o servidor
 try {
   // Tente iniciar o servidor
-  app.listen(3000, () => {
+  app.listen(3001, () => {
       console.log('Servidor iniciado! Para encerrar pressione Ctrl + C.');
   });
 } catch (error) {

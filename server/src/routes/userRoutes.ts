@@ -1,9 +1,10 @@
 import express from 'express';
+const router = express.Router();
 import { PrismaClient } from '@prisma/client';
 import passport from 'passport';
 import { setupGoogleStrategy } from '../auth/googleStrategy';
+import jwt from 'jsonwebtoken';
 
-const router = express.Router();
 const prisma = new PrismaClient();
 
 // Inicializa a estratégia do Google
@@ -13,12 +14,21 @@ setupGoogleStrategy();
 router.post('/register', async (req, res) => {
   const { email, password, name } = req.body;
   try {
+    // Primeiro, verifica se o usuário já existe
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email já está em uso." }); // Conflito
+    }
+    // Se não existir, cria o novo usuário
     const user = await prisma.user.create({
       data: { email, password, name }
-    });
+    })
     res.status(201).json(user);
   } catch (error) {
     console.error('Failed to register user:', error);
+    res.status(201).send({ message: 'Usuário registrado com sucesso!' });
     res.status(500).json({ message: 'Failed to register user' });
   }
 });
@@ -30,7 +40,9 @@ router.post('/login', async (req, res) => {
     where: { email }
   });
   if (user && user.password === password) {
-    res.json(user);
+    // Gera um token usando jwt
+    const token = jwt.sign({ userId: user.id }, 'seuSecretAqui', { expiresIn: '1h' });
+    res.json({ user, token });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
   }
