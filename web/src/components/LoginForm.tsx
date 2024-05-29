@@ -32,7 +32,7 @@ function LoginForm() {
     
             const { token } = await response.json(); // Correto acesso ao token
             console.log('Login successful:', token);
-            login(); // Correto uso do token
+            login(token); // Correto uso do token
             router.push('/'); // Use apenas '/' para redirecionar para a página inicial
         } catch (error) {
             alert((error as Error).message);

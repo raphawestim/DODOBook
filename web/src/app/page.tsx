@@ -1,11 +1,11 @@
 'use client'
-import { AuthProvider, useAuth } from '../auth/AuthContext';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Image from 'next/image';
 import SearchBox from '../components/SearchBox';
 import BoxPublishGroups from '../components/BoxPublishGroups';
 import Button from '../components/Button';
 import { useRouter } from 'next/navigation';
+import { AuthProvider, useAuth } from '../auth/AuthContext';
 
 export default function Home() {
   const { isLoggedIn, login, logout } = useAuth(); // Use o contexto aqui
@@ -30,9 +30,14 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-        login();  // Atualiza o estado de isLoggedIn para true se um token for encontrado
+        login(token);  // Atualiza o estado de isLoggedIn para true se um token for encontrado
     }
 }, []);
+
+
+  useEffect(() => {
+    console.log("Is Logged In changed: ", isLoggedIn);
+  }, [isLoggedIn]);
 
   return (
     <AuthProvider>
